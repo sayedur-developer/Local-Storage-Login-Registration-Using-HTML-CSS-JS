@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="d-flex justify-content-center align-items-center vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="text-center" id="formTitle">Register</h3>
+                        <div id="alertBox"></div>
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="fullName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Register</button>
+                        </form>
+                        <form id="loginForm" class="d-none">
+                            <div class="mb-3">
+                                <label for="loginEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="loginEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="loginPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Login</button>
+                        </form>
+                        <button id="toggleButton" class="btn btn-link w-100 mt-3">Already have an account?
+                            Login</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const registerForm = document.getElementById("registerForm");
+        const loginForm = document.getElementById("loginForm");
+        const toggleButton = document.getElementById("toggleButton");
+        const formTitle = document.getElementById("formTitle");
+        const alertBox = document.getElementById("alertBox");
+
+        toggleButton.addEventListener("click", () => {
+            if (registerForm.classList.contains("d-none")) {
+                registerForm.classList.remove("d-none");
+                loginForm.classList.add("d-none");
+                formTitle.innerText = "Register";
+                toggleButton.innerText = "Already have an account? Login";
+            } else {
+                registerForm.classList.add("d-none");
+                loginForm.classList.remove("d-none");
+                formTitle.innerText = "Login";
+                toggleButton.innerText = "Don't have an account? Register";
+            }
+        });
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 6;
+        }
+
+        registerForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById("fullName").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            if (!validateEmail(email)) {
+                showAlert("Invalid email format!", "danger");
+                return;
+            }
+
+            if (!validatePassword(password)) {
+                showAlert("Password must be at least 6 characters!", "danger");
+                return;
+            }
+
+            if (localStorage.getItem(email)) {
+                showAlert("Email already registered!", "danger");
+            } else {
+                localStorage.setItem(email, JSON.stringify({ fullName, password }));
+                showAlert("Registration successful! Redirecting to login...", "success");
+                setTimeout(() => {
+                    registerForm.classList.add("d-none");
+                    loginForm.classList.remove("d-none");
+                    formTitle.innerText = "Login";
+                    toggleButton.innerText = "Don't have an account? Register";
+                }, 2000);
+                registerForm.reset();
+            }
+        });
+
+        loginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+            const user = JSON.parse(localStorage.getItem(email));
+
+            if (user && user.password === password) {
+                sessionStorage.setItem("loggedInUser", JSON.stringify(user));
+                showAlert("Login successful! Redirecting to profile...", "success");
+                setTimeout(() => {
+                    window.location.href = "profile.html";
+                }, 2000);
+            } else {
+                showAlert("Invalid email or password!", "danger");
+            }
+        });
+
+        function showAlert(message, type) {
+            alertBox.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+            setTimeout(() => alertBox.innerHTML = "", 3000);
+        }
+    </script>
+</body>
+
+</html>
